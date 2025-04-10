@@ -42,7 +42,7 @@ export default function Home() {
 
     const promise = new Promise(async (resolve, reject) => {
   try {
-    // Directly insert into Notion without sending email
+    // Directly insert into Notion
     const notionResponse = await fetch("/api/notion", {
       method: "POST",
       headers: {
@@ -51,19 +51,27 @@ export default function Home() {
       body: JSON.stringify({ name, email }),
     });
 
+    // Debugging: Log response status
+    console.log("Notion response status:", notionResponse.status);
+
     if (!notionResponse.ok) {
+      const errorText = await notionResponse.text(); // more detailed error info
+      console.error("Notion error response:", errorText);
+
       if (notionResponse.status === 429) {
         reject("Rate limited");
       } else {
-        reject("Notion insertion failed");
+        reject("Notion insertion failed: " + errorText);
       }
     } else {
       resolve({ name });
     }
   } catch (error) {
-    reject(error);
+    console.error("Caught error:", error);
+    reject(error.message || "Unexpected error");
   }
 });
+
 
 
     toast.promise(promise, {
