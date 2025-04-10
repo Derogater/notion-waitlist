@@ -67,10 +67,14 @@ export default function Home() {
       resolve({ name });
     }
   } catch (error) {
-    console.error("Caught error:", error);
-    reject(error.message || "Unexpected error");
+  console.error("Caught error:", error);
+  if (error instanceof Error) {
+    reject(error.message);
+  } else {
+    reject("Unexpected error");
   }
-});
+}
+);
 
 
 
