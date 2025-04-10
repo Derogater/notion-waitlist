@@ -41,48 +41,30 @@ export default function Home() {
     setLoading(true);
 
     const promise = new Promise(async (resolve, reject) => {
-      try {
-        // First, attempt to send the email
-        const mailResponse = await fetch("/api/mail", {
-          cache: "no-store",
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ firstname: name, email }),
-        });
-
-        if (!mailResponse.ok) {
-          if (mailResponse.status === 429) {
-            reject("Rate limited");
-          } else {
-            reject("Email sending failed");
-          }
-          return; // Exit the promise early if mail sending fails
-        }
-
-        // If email sending is successful, proceed to insert into Notion
-        const notionResponse = await fetch("/api/notion", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ name, email }),
-        });
-
-        if (!notionResponse.ok) {
-          if (notionResponse.status === 429) {
-            reject("Rate limited");
-          } else {
-            reject("Notion insertion failed");
-          }
-        } else {
-          resolve({ name });
-        }
-      } catch (error) {
-        reject(error);
-      }
+  try {
+    // Directly insert into Notion without sending email
+    const notionResponse = await fetch("/api/notion", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name, email }),
     });
+
+    if (!notionResponse.ok) {
+      if (notionResponse.status === 429) {
+        reject("Rate limited");
+      } else {
+        reject("Notion insertion failed");
+      }
+    } else {
+      resolve({ name });
+    }
+  } catch (error) {
+    reject(error);
+  }
+});
+
 
     toast.promise(promise, {
       loading: "Getting you on the waitlist... 🚀",
