@@ -41,40 +41,35 @@ export default function Home() {
     setLoading(true);
 
     const promise = new Promise(async (resolve, reject) => {
-  try {
-    // Directly insert into Notion
-    const notionResponse = await fetch("/api/notion", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name, email }),
-    });
-
-    // Debugging: Log response status
-    console.log("Notion response status:", notionResponse.status);
-
-    if (!notionResponse.ok) {
-      const errorText = await notionResponse.text(); // more detailed error info
-      console.error("Notion error response:", errorText);
-
-      if (notionResponse.status === 429) {
-        reject("Rate limited");
-      } else {
-        reject("Notion insertion failed: " + errorText);
+      try {
+        const notionResponse = await fetch("/api/notion", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name, email }),
+        });
+    
+        if (!notionResponse.ok) {
+          const errorText = await notionResponse.text();
+          if (notionResponse.status === 429) {
+            reject("Rate limited");
+          } else {
+            reject("Notion insertion failed: " + errorText);
+          }
+        } else {
+          resolve({ name });
+        }
+      } catch (error) {
+        console.error("Caught error:", error);
+        if (error instanceof Error) {
+          reject(error.message);
+        } else {
+          reject("Unexpected error");
+        }
       }
-    } else {
-      resolve({ name });
-    }
-  } catch (error) {
-  console.error("Caught error:", error);
-  if (error instanceof Error) {
-    reject(error.message);
-  } else {
-    reject("Unexpected error");
-  }
-}
-);
+    });
+    
 
 
 
